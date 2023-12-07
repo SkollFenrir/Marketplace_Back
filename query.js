@@ -1,11 +1,11 @@
 const { query } = require('express');
 const { Pool } = require('pg');
-
+const bcrypt = require('bcryptjs');
 const pool = new Pool({
 	host: 'localhost',
 	user: 'postgres',
-	password: 'postgres',
-	database: '',
+	contrasena: 'postgres',
+	database: 'marketplace',
 	allowExitOnIdle: true,
 });
 
@@ -16,28 +16,28 @@ const getProducts = async () => {
 	return productos;
 };
 
-const getMyProducts = async () =>{
-    
-}
+const getMyProducts = async () => {};
 
-const verifyCrede = async (email, password) => {
-	const values = [email];
-	const consulta = 'SELECT * FROM usuarios WHERE email = $1';
+const verifyCrede = async (correo, contrasena) => {
+	const values = [correo];
+	const consulta = 'SELECT * FROM usuarios WHERE correo = $1';
 	const {
 		rows: [usuario],
 		rowCount,
 	} = await pool.query(consulta, values);
-	const { password: passwordCrypt } = usuario;
-	const passwordCorrecta = bcrypt.compareSync(password, passwordCrypt);
-	if (!passwordCorrecta || !rowCount) {
+	const { contrasena: contrasenaCrypt } = usuario;
+	const contrasenaCorrecta = bcrypt.compareSync(contrasena, contrasenaCrypt);
+	if (!contrasenaCorrecta || !rowCount) {
 		throw { code: 401, message: 'Email o contraseña incorrecta' };
 	}
 };
 
 const registrarUsuario = async (usuario) => {
-	let { nombre, apellido, email, password, genero} = usuario;
-	const passwordCrypt = bcrypt.hashSync(password);
-	const values = [nombre, apellido, email, passwordCrypt, genero];
+	let { nombre, apellido, correo, contrasena, genero } = usuario;
+	const contrasenaCrypt = bcrypt.hashSync(contrasena);
+	const values = [nombre, apellido, correo, contrasenaCrypt, genero];
 	const query = 'INSERT INTO usuarios values (DEFAULT, $1, $2, $3, $4, $5)';
 	await pool.query(query, values);
 };
+
+module.exports = { getProducts, verifyCrede };

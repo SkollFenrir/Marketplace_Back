@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 
 const checkCrede = (req, res, next) => {
-	const { email, password } = req.body;
-	if (!email || !password) {
+	const { correo, contrasena } = req.body;
+	if (!correo || !contrasena) {
 		res.status(401).send({ message: 'No se recibieron las credenciales' });
 	}
 	next();
