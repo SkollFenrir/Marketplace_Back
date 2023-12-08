@@ -67,10 +67,43 @@ const postRegistrarU = async (usuario) => {
 	await pool.query(formatQuery);
 };
 
+const updateProducto = async (producto, id) => {
+	let { precio, estado } = producto;
+	const formatQuery = format(
+		'UPDATE productos SET precio = %L, estado = %L WHERE id = %s RETURNING *',
+		precio,
+		estado,
+		id
+	);
+	
+	try {
+		const result = await pool.query(formatQuery);
+		if (result.rows.length > 0) {
+			return result.rows[0];
+		} else {
+			return null;
+		}
+	} catch (error) {
+		console.error('Error al actualizar el producto:', error);
+		throw {
+			code: error.code,
+			message: error.message,
+			detail: error.detail,
+		};
+	}
+};
+
+const deleteProduct = async (id) => {
+	const formatQuery = format('DELETE FROM productos WHERE id = %s', id);
+	await pool.query(formatQuery);
+};
+
 module.exports = {
 	getProducts,
 	getProduct,
 	postVerifyCrede,
 	postRegistrarU,
 	postVender,
+	updateProducto,
+	deleteProduct,
 };
