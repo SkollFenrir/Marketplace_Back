@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
+const format = require('pg-format');
 
 const pool = new Pool({
 	host: 'localhost',
@@ -10,34 +11,66 @@ const pool = new Pool({
 });
 
 const getProducts = async () => {
-	const {rows : productos} = await pool.query('SELECT * FROM productos;');
+	const { rows: productos } = await pool.query('SELECT * FROM productos;');
 	return productos;
+};
+
+const getProduct = async (id) => {
+	const formatQuery = format('SELECT * FROM productos WHERE id = %s', id);
+	const { rows: producto } = await pool.query(formatQuery);
+	return producto;
 };
 
 const getMyProducts = async () => {};
 
-const verifyCrede = async (correo, contrasena) => {
-	const values = [correo];
-	const query = 'SELECT * FROM usuarios WHERE correo = $1';
+const postVender = async (producto) => {
+	let { usuario_id, titulo, descripcion, url_img, precio, estado } = producto;
+	const formatQuery = format(
+		'INSERT INTO productos VALUES (DEFAULT, %s, %L, %L, %L, %s, %L)',
+		usuario_id,
+		titulo,
+		descripcion,
+		url_img,
+		precio,
+		estado
+	);
+	await pool.query(formatQuery);
+};
+const postVerifyCrede = async (correo, contrasena) => {
+	const formatQuery = format(
+		'SELECT * FROM usuarios WHERE correo = %L',
+		correo
+	);
 	const {
 		rows: [usuario],
 		rowCount,
-	} = await pool.query(query, values);
+	} = await pool.query(formatQuery);
 	const { contrasena: contrasenaCrypt } = usuario;
-	const saltRounds = 10;
-	const contraCrypt = bcrypt.hashSync(contrasenaCrypt, saltRounds);
-	const contrasenaCorrecta = bcrypt.compareSync(contrasena, contraCrypt);
+	const contrasenaCorrecta = bcrypt.compareSync(contrasena, contrasenaCrypt);
 	if (!contrasenaCorrecta || !rowCount) {
 		throw { code: 401, message: `Email o contraseña incorrecta` };
 	}
 };
 
-const registrarUsuario = async (usuario) => {
+const postRegistrarU = async (usuario) => {
+	const saltRounds = 10;
 	let { nombre, apellido, correo, contrasena, genero } = usuario;
-	const contrasenaCrypt = bcrypt.hashSync(contrasena);
-	const values = [nombre, apellido, correo, contrasenaCrypt, genero];
-	const query = 'INSERT INTO usuarios values (DEFAULT, $1, $2, $3, $4, $5)';
-	await pool.query(query, values);
+	const contrasenaCrypt = bcrypt.hashSync(contrasena, saltRounds);
+	const formatQuery = format(
+		'INSERT INTO usuarios VALUES (DEFAULT, %L, %L, %L, %L, %L)',
+		nombre,
+		apellido,
+		correo,
+		contrasenaCrypt,
+		genero
+	);
+	await pool.query(formatQuery);
 };
 
-module.exports = { getProducts, verifyCrede };
+module.exports = {
+	getProducts,
+	getProduct,
+	postVerifyCrede,
+	postRegistrarU,
+	postVender,
+};

@@ -8,6 +8,7 @@ const checkCrede = (req, res, next) => {
 	next();
 };
 const verifyToken = (req, res, next) => {
+	
 	const token = req.header('Authorization').split('Bearer ')[1];
 	if (!token) {
 		throw {
