@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
+const format = require('pg-format')
 
 const pool = new Pool({
 	host: 'localhost',
@@ -24,20 +25,19 @@ const verifyCrede = async (correo, contrasena) => {
 		rowCount,
 	} = await pool.query(query, values);
 	const { contrasena: contrasenaCrypt } = usuario;
-	const saltRounds = 10;
-	const contraCrypt = bcrypt.hashSync(contrasenaCrypt, saltRounds);
-	const contrasenaCorrecta = bcrypt.compareSync(contrasena, contraCrypt);
+	const contrasenaCorrecta = bcrypt.compareSync(contrasena, contrasenaCrypt);
 	if (!contrasenaCorrecta || !rowCount) {
 		throw { code: 401, message: `Email o contraseña incorrecta` };
 	}
 };
 
 const registrarUsuario = async (usuario) => {
+	const saltRounds = 10;
 	let { nombre, apellido, correo, contrasena, genero } = usuario;
-	const contrasenaCrypt = bcrypt.hashSync(contrasena);
+	const contrasenaCrypt = bcrypt.hashSync(contrasena, saltRounds);
 	const values = [nombre, apellido, correo, contrasenaCrypt, genero];
-	const query = 'INSERT INTO usuarios values (DEFAULT, $1, $2, $3, $4, $5)';
+	const query = 'INSERT INTO usuarios VALUES (DEFAULT, $1, $2, $3, $4, $5)';
 	await pool.query(query, values);
 };
 
-module.exports = { getProducts, verifyCrede };
+module.exports = { getProducts, verifyCrede, registrarUsuario };
