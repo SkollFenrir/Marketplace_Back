@@ -1,6 +1,6 @@
 const express = require('express');
-const { getProducts, verifyCrede, registrarUsuario } = require('./query');
-const { checkCrede } = require('./middlewares');
+const { getProducts, verifyCrede, registrarUsuario, getProduct } = require('./query');
+const { checkCrede, verifyToken } = require('./middlewares');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const morganBody = require('morgan-body');
@@ -15,14 +15,24 @@ app.listen(PORT, () => {
 app.use(cors());
 app.use(express.json());
 
-app.get('/productos', async (req, res) => {
+app.get('/productos', verifyToken, async (req, res) => {
 	try {
 		const productos = await getProducts();
 		res.json(productos);
-	} catch (error) {
-		res.status(500).send(error);
+	} catch ({ code, message }) {
+		res.status(code).send(message);
 	}
 });
+
+app.get('/productos/:id', verifyToken, async(req, res)=>{
+	try {
+		const {id} = req.params;
+		const producto = await getProduct(id)
+		res.json(producto)
+	} catch ({ code, message }) {
+		res.status(code).send(message);
+	}
+})
 
 app.post('/login', checkCrede, async (req, res) => {
 	try {
@@ -30,8 +40,8 @@ app.post('/login', checkCrede, async (req, res) => {
 		await verifyCrede(correo, contrasena);
 		const token = jwt.sign({ correo }, 'key');
 		res.send(token);
-	} catch (error) {
-		res.status(500).send(error);
+	} catch ({ code, message }) {
+		res.status(code).send(message);
 	}
 });
 
@@ -40,7 +50,7 @@ app.post('/registrar', async (req, res) => {
 		const usuario = req.body;
 		await registrarUsuario(usuario);
 		res.send('Usuario creado con éxito');
-	} catch (error) {
-		res.status(500).send(error);
+	} catch ({ code, message }) {
+		res.status(code).send(message);
 	}
 });

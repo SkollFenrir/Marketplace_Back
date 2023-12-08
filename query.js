@@ -15,6 +15,12 @@ const getProducts = async () => {
 	return productos;
 };
 
+const getProduct = async(id) => {
+	const formatQuery= format('SELECT * FROM productos WHERE id = %s', id)
+	const {rows: producto} = await pool.query(formatQuery)
+	return producto
+}
+
 const getMyProducts = async () => {};
 
 const verifyCrede = async (correo, contrasena) => {
@@ -47,4 +53,4 @@ const registrarUsuario = async (usuario) => {
 	await pool.query(formatQuery);
 };
 
-module.exports = { getProducts, verifyCrede, registrarUsuario };
+module.exports = { getProducts, getProduct, verifyCrede, registrarUsuario };
