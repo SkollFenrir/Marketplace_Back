@@ -39,4 +39,18 @@ describe('Test a rutas de Marketplace', () => {
 			.send(producto);
 		expect(statusCode).toBe(201);
 	});
+
+	it('Obteniendo un status 404', async () => {
+		const token = jwt.sign({ correo: 'Jhon.Doe@gmail.com' }, 'key', {
+			expiresIn: '1h',
+		});
+		const firstId = Math.floor(Math.random() * 999);
+		const producto = { precio: 22222, estado: false };
+		const { statusCode } = await request(server)
+			.put(`/productos/${firstId}`)
+			.set('Authorization', `Bearer ${token}`)
+			.send(producto);
+
+		expect(statusCode).toBe(404);
+	});
 });

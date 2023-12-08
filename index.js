@@ -5,6 +5,8 @@ const {
 	postVerifyCrede,
 	postRegistrarU,
 	postVender,
+	deleteProduct,
+	updateProducto,
 } = require('./query');
 const { checkCrede, verifyToken } = require('./middlewares');
 const cors = require('cors');
@@ -31,8 +33,8 @@ app.get('/productos', verifyToken, async (req, res) => {
 });
 
 app.get('/productos/:id', verifyToken, async (req, res) => {
+	const { id } = req.params;
 	try {
-		const { id } = req.params;
 		const producto = await getProduct(id);
 		res.json(producto);
 	} catch (error) {
@@ -41,8 +43,8 @@ app.get('/productos/:id', verifyToken, async (req, res) => {
 });
 
 app.post('/login', checkCrede, async (req, res) => {
+	const { correo, contrasena } = req.body;
 	try {
-		const { correo, contrasena } = req.body;
 		await postVerifyCrede(correo, contrasena);
 		const token = jwt.sign({ correo }, 'key');
 		res.send(token);
@@ -52,8 +54,8 @@ app.post('/login', checkCrede, async (req, res) => {
 });
 
 app.post('/registrar', async (req, res) => {
+	const usuario = req.body;
 	try {
-		const usuario = req.body;
 		await postRegistrarU(usuario);
 		res.send('Usuario creado con éxito');
 	} catch (error) {
@@ -62,10 +64,39 @@ app.post('/registrar', async (req, res) => {
 });
 
 app.post('/vender', verifyToken, async (req, res) => {
+	const producto = req.body;
 	try {
-		const producto = req.body;
 		await postVender(producto);
 		res.status(201).send('Producto ingresado exitosamente');
+	} catch (error) {
+		res.status(500).send(error);
+	}
+});
+
+app.put('/productos/:id', verifyToken, async (req, res) => {
+	const id = req.params.id;
+	const producto = req.body;
+	try {
+		const updatedProducto = await updateProducto(producto, id);
+
+		if (updatedProducto) {
+			res.status(200).json(updatedProducto);
+		} else {
+			res
+				.status(404)
+				.json({ message: 'No se encontró ningún producto con ese ID.' });
+		}
+	} catch (error) {
+		console.error('Error en la ruta PUT /productos/:id', error);
+		res.status(500).json({ message: 'Error al procesar la solicitud.' });
+	}
+});
+
+app.delete('/productos/:id', verifyToken, async (req, res) => {
+	const { id } = req.params;
+	try {
+		await deleteProduct(id);
+		res.send(`El producto ${id} fue eliminado correctamente`);
 	} catch (error) {
 		res.status(500).send(error);
 	}
