@@ -1,18 +1,16 @@
-const { query } = require('express');
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
+
 const pool = new Pool({
 	host: 'localhost',
 	user: 'postgres',
-	contrasena: 'postgres',
+	password: 'postgres',
 	database: 'marketplace',
 	allowExitOnIdle: true,
 });
 
 const getProducts = async () => {
-	const query = 'SELECT * FROM productos';
-	const result = await pool.query(query);
-	const [productos] = result.rows;
+	const {rows : productos} = await pool.query('SELECT * FROM productos;');
 	return productos;
 };
 
@@ -20,15 +18,17 @@ const getMyProducts = async () => {};
 
 const verifyCrede = async (correo, contrasena) => {
 	const values = [correo];
-	const consulta = 'SELECT * FROM usuarios WHERE correo = $1';
+	const query = 'SELECT * FROM usuarios WHERE correo = $1';
 	const {
 		rows: [usuario],
 		rowCount,
-	} = await pool.query(consulta, values);
+	} = await pool.query(query, values);
 	const { contrasena: contrasenaCrypt } = usuario;
-	const contrasenaCorrecta = bcrypt.compareSync(contrasena, contrasenaCrypt);
+	const saltRounds = 10;
+	const contraCrypt = bcrypt.hashSync(contrasenaCrypt, saltRounds);
+	const contrasenaCorrecta = bcrypt.compareSync(contrasena, contraCrypt);
 	if (!contrasenaCorrecta || !rowCount) {
-		throw { code: 401, message: 'Email o contraseña incorrecta' };
+		throw { code: 401, message: `Email o contraseña incorrecta` };
 	}
 };
 

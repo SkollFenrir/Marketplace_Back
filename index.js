@@ -5,11 +5,12 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const morganBody = require('morgan-body');
 const app = express();
-
 const PORT = 3000;
 
+morganBody(app);
+
 app.listen(PORT, () => {
-	console.log(`Server On  ${PORT}`);
+	console.log(`Server On ${PORT}`);
 });
 app.use(cors());
 app.use(express.json());
@@ -19,7 +20,7 @@ app.get('/productos', async (req, res) => {
 		const productos = await getProducts();
 		res.json(productos);
 	} catch (error) {
-		res.status.send(error);
+		res.status(500).send(error);
 	}
 });
 
