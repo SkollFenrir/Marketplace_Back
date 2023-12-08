@@ -15,15 +15,28 @@ const getProducts = async () => {
 	return productos;
 };
 
-const getProduct = async(id) => {
-	const formatQuery= format('SELECT * FROM productos WHERE id = %s', id)
-	const {rows: producto} = await pool.query(formatQuery)
-	return producto
-}
+const getProduct = async (id) => {
+	const formatQuery = format('SELECT * FROM productos WHERE id = %s', id);
+	const { rows: producto } = await pool.query(formatQuery);
+	return producto;
+};
 
 const getMyProducts = async () => {};
 
-const verifyCrede = async (correo, contrasena) => {
+const postVender = async (producto) => {
+	let { usuario_id, titulo, descripcion, url_img, precio, estado } = producto;
+	const formatQuery = format(
+		'INSERT INTO productos VALUES (DEFAULT, %s, %L, %L, %L, %s, %L)',
+		usuario_id,
+		titulo,
+		descripcion,
+		url_img,
+		precio,
+		estado
+	);
+	await pool.query(formatQuery);
+};
+const postVerifyCrede = async (correo, contrasena) => {
 	const formatQuery = format(
 		'SELECT * FROM usuarios WHERE correo = %L',
 		correo
@@ -39,18 +52,25 @@ const verifyCrede = async (correo, contrasena) => {
 	}
 };
 
-const registrarUsuario = async (usuario) => {
+const postRegistrarU = async (usuario) => {
 	const saltRounds = 10;
 	let { nombre, apellido, correo, contrasena, genero } = usuario;
 	const contrasenaCrypt = bcrypt.hashSync(contrasena, saltRounds);
-	const formatQuery =
-		format('INSERT INTO usuarios VALUES (DEFAULT, %L, %L, %L, %L, %L)',
+	const formatQuery = format(
+		'INSERT INTO usuarios VALUES (DEFAULT, %L, %L, %L, %L, %L)',
 		nombre,
 		apellido,
 		correo,
 		contrasenaCrypt,
-		genero);
+		genero
+	);
 	await pool.query(formatQuery);
 };
 
-module.exports = { getProducts, getProduct, verifyCrede, registrarUsuario };
+module.exports = {
+	getProducts,
+	getProduct,
+	postVerifyCrede,
+	postRegistrarU,
+	postVender,
+};
