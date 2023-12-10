@@ -77,18 +77,10 @@ app.put('/productos/:id', verifyToken, async (req, res) => {
 	const id = req.params.id;
 	const producto = req.body;
 	try {
-		const updatedProducto = await updateProducto(producto, id);
-
-		if (updatedProducto) {
-			res.status(200).json(updatedProducto);
-		} else {
-			res
-				.status(404)
-				.json({ message: 'No se encontró ningún producto con ese ID.' });
-		}
-	} catch (error) {
-		console.error('Error en la ruta PUT /productos/:id', error);
-		res.status(500).json({ message: 'Error al procesar la solicitud.' });
+		await updateProducto(producto, id)
+		res.send(`El producto con ID: ${id}, fue modificado exitosamente.`)
+	} catch ({code , message}) {
+		res.status(code).send(message);
 	}
 });
 
@@ -96,9 +88,9 @@ app.delete('/productos/:id', verifyToken, async (req, res) => {
 	const { id } = req.params;
 	try {
 		await deleteProduct(id);
-		res.send(`El producto ${id} fue eliminado correctamente`);
-	} catch (error) {
-		res.status(500).send(error);
+		res.send(`El producto con ID: ${id}, fue eliminado correctamente`);
+	} catch({code , message}) {
+		res.status(code).send(message);
 	}
 });
 
