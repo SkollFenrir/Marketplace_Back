@@ -67,6 +67,17 @@ const postRegistrarU = async (usuario) => {
 	await pool.query(formatQuery);
 };
 
+const checkProductExists = async (productId) => {
+	try {
+		const formatQuery = format('SELECT 1 FROM productos WHERE id = %s', productId)
+	  const result = await pool.query(formatQuery);
+	  return result.rows.length > 0;
+	} catch (error) {
+	  console.error('Error al verificar la existencia del producto:', error);
+	  throw { code: 500, message: 'Error interno del servidor' };
+	}
+  };
+
 const updateProducto = async (producto, id) => {
 	let { precio, estado } = producto;
 	const formatQuery = format(
@@ -75,25 +86,18 @@ const updateProducto = async (producto, id) => {
 		estado,
 		id
 	);
-	
-	try {
-		const result = await pool.query(formatQuery);
-		if (result.rows.length > 0) {
-			return result.rows[0];
-		} else {
-			return null;
-		}
-	} catch (error) {
-		console.error('Error al actualizar el producto:', error);
-		throw {
-			code: error.code,
-			message: error.message,
-			detail: error.detail,
-		};
-	}
+	const productExists = await checkProductExists(id)
+	if (!productExists) {
+		throw { code: 404, message: 'No se encontró ningún producto con ese ID' };
+	  }
+	await pool.query(formatQuery)
 };
 
 const deleteProduct = async (id) => {
+	const productExists = await checkProductExists(id)
+	if (!productExists) {
+		throw { code: 404, message: 'No se encontró ningún producto con ese ID' };
+	  }
 	const formatQuery = format('DELETE FROM productos WHERE id = %s', id);
 	await pool.query(formatQuery);
 };
