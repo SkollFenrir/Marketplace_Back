@@ -40,7 +40,7 @@ describe('Test a rutas de Marketplace', () => {
 		expect(statusCode).toBe(201);
 	});
 
-	it('Obteniendo un status 404 al intentar modificar un articulo inexistente', async () => {
+	it('Obteniendo un status 404 al intentar modificar un articulo con ID inexistente', async () => {
 		const token = jwt.sign({ correo: 'Jhon.Doe@gmail.com' }, 'key', {
 			expiresIn: '1h',
 		});
@@ -54,7 +54,7 @@ describe('Test a rutas de Marketplace', () => {
 		expect(statusCode).toBe(404);
 	});
 
-	it('Obteniendo un status 404 al intentar eliminar un articulo inexistente', async () => {
+	it('Obteniendo un status 404 al intentar eliminar un articulo con ID inexistente', async () => {
 		const token = jwt.sign({ correo: 'Jhon.Doe@gmail.com' }, 'key', {
 			expiresIn: '1h',
 		});
@@ -66,5 +66,4 @@ describe('Test a rutas de Marketplace', () => {
 
 		expect(statusCode).toBe(404);
 	});
-
 });
