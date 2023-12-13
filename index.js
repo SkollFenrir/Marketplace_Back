@@ -7,6 +7,7 @@ const {
 	postVender,
 	deleteProduct,
 	updateProducto,
+	getMyProducts,
 } = require('./query');
 const { checkCrede, verifyToken } = require('./middlewares');
 const cors = require('cors');
@@ -42,6 +43,16 @@ app.get('/productos/:id', verifyToken, async (req, res) => {
 	}
 });
 
+app.get('/myProducts', verifyToken, async (req, res) => {
+	const correoUsuario = req.correoUsuario;
+	try {
+		const myProducts = await getMyProducts(correoUsuario);
+		res.json(myProducts);
+	} catch (error) {
+		res.status(500).send();
+	}
+});
+
 app.post('/login', checkCrede, async (req, res) => {
 	const { correo, contrasena } = req.body;
 	try {
@@ -65,8 +76,9 @@ app.post('/registrar', async (req, res) => {
 
 app.post('/vender', verifyToken, async (req, res) => {
 	const producto = req.body;
+	const correoUsuario = req.correoUsuario;
 	try {
-		await postVender(producto);
+		await postVender(producto, correoUsuario);
 		res.status(201).send('Producto ingresado exitosamente');
 	} catch (error) {
 		res.status(500).send(error);
@@ -77,9 +89,9 @@ app.put('/productos/:id', verifyToken, async (req, res) => {
 	const id = req.params.id;
 	const producto = req.body;
 	try {
-		await updateProducto(producto, id)
-		res.send(`El producto con ID: ${id}, fue modificado exitosamente.`)
-	} catch ({code , message}) {
+		await updateProducto(producto, id);
+		res.send(`El producto con ID: ${id}, fue modificado exitosamente.`);
+	} catch ({ code, message }) {
 		res.status(code).send(message);
 	}
 });
@@ -89,7 +101,7 @@ app.delete('/productos/:id', verifyToken, async (req, res) => {
 	try {
 		await deleteProduct(id);
 		res.send(`El producto con ID: ${id}, fue eliminado correctamente`);
-	} catch({code , message}) {
+	} catch ({ code, message }) {
 		res.status(code).send(message);
 	}
 });
