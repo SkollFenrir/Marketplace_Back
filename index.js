@@ -8,6 +8,7 @@ const {
 	deleteProduct,
 	updateProducto,
 	getMyProducts,
+	postMiFav,
 } = require('./query');
 const { checkCrede, verifyToken } = require('./middlewares');
 const cors = require('cors');
@@ -59,6 +60,17 @@ app.post('/login', checkCrede, async (req, res) => {
 		await postVerifyCrede(correo, contrasena);
 		const token = jwt.sign({ correo }, 'key');
 		res.send(token);
+	} catch (error) {
+		res.status(500).send(error);
+	}
+});
+
+app.post('/productos/:id', verifyToken, async (req, res) => {
+	const productoId = req.params.id;
+	const correoUsuario = req.correoUsuario;
+	try {
+		await postMiFav(productoId, correoUsuario);
+		res.send('Producto agregado a favoritos')
 	} catch (error) {
 		res.status(500).send(error);
 	}
