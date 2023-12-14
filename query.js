@@ -10,16 +10,24 @@ const pool = new Pool({
 	allowExitOnIdle: true,
 });
 
-const getUsuarioId = async (correoUsuario) =>{
+const getUsuarioId = async (correoUsuario) => {
 	try {
-		const formatQuery = format('SELECT id FROM usuarios WHERE correo = %L', correoUsuario)
-		const {rows: [{id}]} = await pool.query(formatQuery)
-		return id
+		const formatQuery = format(
+			'SELECT id FROM usuarios WHERE correo = %L',
+			correoUsuario
+		);
+		const {
+			rows: [{ id }],
+		} = await pool.query(formatQuery);
+		return id;
 	} catch (error) {
 		console.error('Error al verificar la existencia del producto:', error);
-		throw { code: 404, message: 'No se encontró ningún usuario con ese CORREO' };
+		throw {
+			code: 404,
+			message: 'No se encontró ningún usuario con ese CORREO',
+		};
 	}
-}
+};
 
 const getProducts = async () => {
 	const { rows: productos } = await pool.query('SELECT * FROM productos;');
@@ -42,8 +50,8 @@ const getMyProducts = async (correoUsuario) => {
 };
 
 const postVender = async (producto, correoUsuario) => {
-	let {  titulo, descripcion, url_img, precio, estado } = producto;
-	const usuario_id = await getUsuarioId(correoUsuario)
+	let { titulo, descripcion, url_img, precio, estado } = producto;
+	const usuario_id = await getUsuarioId(correoUsuario);
 	const formatQuery = format(
 		'INSERT INTO productos (id, usuario_id, titulo, descripcion, url_img, precio, estado) VALUES (DEFAULT, %s, %L, %L, %L, %s, %L)',
 		usuario_id,
@@ -55,6 +63,17 @@ const postVender = async (producto, correoUsuario) => {
 	);
 	await pool.query(formatQuery);
 };
+
+const postMiFav = async (productoId, correoUsuario) => {
+	const usuarioId = await getUsuarioId(correoUsuario);
+	const formatQuery = format(
+		'INSERT INTO mis_favoritos (id, usuario_id, producto_id) VALUES (DEFAULT, %s, %s)',
+		usuarioId,
+		productoId
+	);
+	await pool.query(formatQuery);
+};
+
 const postVerifyCrede = async (correo, contrasena) => {
 	const formatQuery = format(
 		'SELECT * FROM usuarios WHERE correo = %L',
@@ -130,6 +149,7 @@ module.exports = {
 	postVerifyCrede,
 	postRegistrarU,
 	postVender,
+	postMiFav,
 	updateProducto,
 	deleteProduct,
 	getMyProducts,
