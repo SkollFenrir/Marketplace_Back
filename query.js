@@ -134,6 +134,16 @@ const updateProducto = async (producto, id) => {
 	await pool.query(formatQuery);
 };
 
+const deleteMyFav = async (productId, correoUsuario) => {
+	const usuarioId = await getUsuarioId(correoUsuario);
+	const formatQuery = format(
+		'DELETE FROM mis_favoritos WHERE usuario_id = %s AND producto_id = %s',
+		usuarioId,
+		productId
+	);
+	await pool.query(formatQuery);
+};
+
 const deleteProduct = async (id) => {
 	const productExists = await checkProductExists(id);
 	if (!productExists) {
@@ -153,4 +163,5 @@ module.exports = {
 	updateProducto,
 	deleteProduct,
 	getMyProducts,
+	deleteMyFav,
 };

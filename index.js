@@ -9,6 +9,7 @@ const {
 	updateProducto,
 	getMyProducts,
 	postMiFav,
+	deleteMyFav,
 } = require('./query');
 const { checkCrede, verifyToken } = require('./middlewares');
 const cors = require('cors');
@@ -70,7 +71,7 @@ app.post('/productos/:id', verifyToken, async (req, res) => {
 	const correoUsuario = req.correoUsuario;
 	try {
 		await postMiFav(productoId, correoUsuario);
-		res.send('Producto agregado a favoritos')
+		res.send('Producto agregado a favoritos');
 	} catch (error) {
 		res.status(500).send(error);
 	}
@@ -109,6 +110,17 @@ app.put('/productos/:id', verifyToken, async (req, res) => {
 });
 
 app.delete('/productos/:id', verifyToken, async (req, res) => {
+	const productoId = req.params.id;
+	const correoUsuario = req.correoUsuario;
+	try {
+		await deleteMyFav(productoId, correoUsuario);
+		res.send(`Producto con ID: ${productoId}, eliminado de favoritos`);
+	} catch ({ code, message }) {
+		res.status(code).send(message);
+	}
+});
+
+app.delete('/myProducts/:id', verifyToken, async (req, res) => {
 	const { id } = req.params;
 	try {
 		await deleteProduct(id);
