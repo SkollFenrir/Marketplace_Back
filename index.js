@@ -11,7 +11,7 @@ const {
 	postMiFav,
 	deleteMyFav,
 } = require('./query');
-const { checkCrede, verifyToken } = require('./middlewares');
+const { checkCrede, verifyToken } = require('./middlewares.js');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const morganBody = require('morgan-body');
@@ -59,7 +59,9 @@ app.post('/login', checkCrede, async (req, res) => {
 	const { correo, contrasena } = req.body;
 	try {
 		await postVerifyCrede(correo, contrasena);
-		const token = jwt.sign({ correo }, 'key');
+		const token = jwt.sign({ correo }, 'key',/*  {
+			expiresIn: '1h',
+		} */);
 		res.send(token);
 	} catch (error) {
 		res.status(500).send(error);
