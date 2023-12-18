@@ -29,6 +29,15 @@ const getUsuarioId = async (correoUsuario) => {
 	}
 };
 
+const getUser = async (correoUsuario) => {
+	const formatQuery = format(
+		'SELECT * FROM usuarios WHERE correo = %L',
+		correoUsuario
+	);
+	const { rows: user } = await pool.query(formatQuery);
+	return user;
+};
+
 const getProducts = async () => {
 	const { rows: productos } = await pool.query('SELECT * FROM productos;');
 	return productos;
@@ -155,6 +164,7 @@ const deleteProduct = async (id) => {
 
 module.exports = {
 	getProducts,
+	getUser,
 	getProduct,
 	postVerifyCrede,
 	postRegistrarU,

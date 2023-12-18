@@ -10,6 +10,7 @@ const {
 	getMyProducts,
 	postMiFav,
 	deleteMyFav,
+	getUser,
 } = require('./query');
 const { checkCrede, verifyToken } = require('./middlewares.js');
 const cors = require('cors');
@@ -26,7 +27,7 @@ app.listen(PORT, () => {
 app.use(cors());
 app.use(express.json());
 
-app.get('/productos', verifyToken, async (req, res) => {
+app.get('/gallery', /* verifyToken */ async (req, res) => {
 	try {
 		const productos = await getProducts();
 		res.json(productos);
@@ -35,7 +36,18 @@ app.get('/productos', verifyToken, async (req, res) => {
 	}
 });
 
-app.get('/productos/:id', verifyToken, async (req, res) => {
+app.get('/profile', verifyToken, async (req, res) =>{
+	const correoUsuario = req.correoUsuario;
+	console.log(correoUsuario)
+	try {
+		const user = await getUser(correoUsuario)
+		res.json(user)
+	} catch ({ code, message }) {
+		res.status(code).send(message);
+	}
+})
+
+app.get('/product/:id', verifyToken, async (req, res) => {
 	const { id } = req.params;
 	try {
 		const producto = await getProduct(id);
@@ -45,7 +57,7 @@ app.get('/productos/:id', verifyToken, async (req, res) => {
 	}
 });
 
-app.get('/myProducts', verifyToken, async (req, res) => {
+app.get('/my-products', verifyToken, async (req, res) => {
 	const correoUsuario = req.correoUsuario;
 	try {
 		const myProducts = await getMyProducts(correoUsuario);
@@ -59,16 +71,19 @@ app.post('/login', checkCrede, async (req, res) => {
 	const { correo, contrasena } = req.body;
 	try {
 		await postVerifyCrede(correo, contrasena);
-		const token = jwt.sign({ correo }, 'key',/*  {
+		const token = jwt.sign(
+			{ correo },
+			'key' /*  {
 			expiresIn: '1h',
-		} */);
+		} */
+		);
 		res.send(token);
 	} catch (error) {
 		res.status(500).send(error);
 	}
 });
 
-app.post('/productos/:id', verifyToken, async (req, res) => {
+app.post('/product/:id', verifyToken, async (req, res) => {
 	const productoId = req.params.id;
 	const correoUsuario = req.correoUsuario;
 	try {
@@ -79,7 +94,7 @@ app.post('/productos/:id', verifyToken, async (req, res) => {
 	}
 });
 
-app.post('/registrar', async (req, res) => {
+app.post('/register', async (req, res) => {
 	const usuario = req.body;
 	try {
 		await postRegistrarU(usuario);
@@ -89,7 +104,7 @@ app.post('/registrar', async (req, res) => {
 	}
 });
 
-app.post('/vender', verifyToken, async (req, res) => {
+app.post('/sell', verifyToken, async (req, res) => {
 	const producto = req.body;
 	const correoUsuario = req.correoUsuario;
 	try {
@@ -100,7 +115,7 @@ app.post('/vender', verifyToken, async (req, res) => {
 	}
 });
 
-app.put('/productos/:id', verifyToken, async (req, res) => {
+app.put('/product/:id', verifyToken, async (req, res) => {
 	const id = req.params.id;
 	const producto = req.body;
 	try {
@@ -111,7 +126,7 @@ app.put('/productos/:id', verifyToken, async (req, res) => {
 	}
 });
 
-app.delete('/productos/:id', verifyToken, async (req, res) => {
+app.delete('/product/:id', verifyToken, async (req, res) => {
 	const productoId = req.params.id;
 	const correoUsuario = req.correoUsuario;
 	try {
