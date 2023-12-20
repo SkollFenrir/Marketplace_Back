@@ -49,13 +49,29 @@ const getProduct = async (id) => {
 	return producto;
 };
 
-const getMyProducts = async (correoUsuario) => {
+const getMyProducts = async (usuario_id) => {
 	const formatQuery = format(
-		'SELECT * FROM productos WHERE usuario_id = (SELECT id FROM usuarios WHERE correo = %L)',
-		correoUsuario
+		'SELECT * FROM productos WHERE usuario_id = %s',
+		usuario_id
 	);
 	const { rows: myProducts } = await pool.query(formatQuery);
 	return myProducts;
+};
+
+const getMyFavorites = async (usuario) => {
+	
+	const formatQuery = format(
+		'SELECT * FROM mis_favoritos WHERE usuario_id = %s',
+		usuario
+	);
+	try {
+		console.log(usuario)
+		const { rows: myFavorites } = await pool.query(formatQuery);
+		console.log(myFavorites);
+		return myFavorites;
+	} catch (error) {
+		console.log(error);
+	}
 };
 
 const postVender = async (producto, correoUsuario) => {
@@ -166,12 +182,13 @@ module.exports = {
 	getProducts,
 	getUser,
 	getProduct,
+	getMyProducts,
+	getMyFavorites,
 	postVerifyCrede,
 	postRegistrarU,
 	postVender,
 	postMiFav,
 	updateProducto,
 	deleteProduct,
-	getMyProducts,
 	deleteMyFav,
 };

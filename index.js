@@ -11,6 +11,7 @@ const {
 	postMiFav,
 	deleteMyFav,
 	getUser,
+	getMyFavorites,
 } = require('./query');
 const { checkCrede, verifyToken } = require('./middlewares.js');
 const cors = require('cors');
@@ -27,7 +28,7 @@ app.listen(PORT, () => {
 app.use(cors());
 app.use(express.json());
 
-app.get('/gallery', /* verifyToken */ async (req, res) => {
+app.get('/gallery', verifyToken, async (req, res) => {
 	try {
 		const productos = await getProducts();
 		res.json(productos);
@@ -36,16 +37,16 @@ app.get('/gallery', /* verifyToken */ async (req, res) => {
 	}
 });
 
-app.get('/profile', verifyToken, async (req, res) =>{
+app.get('/profile', verifyToken, async (req, res) => {
 	const correoUsuario = req.correoUsuario;
-	console.log(correoUsuario)
+	console.log(correoUsuario);
 	try {
-		const user = await getUser(correoUsuario)
-		res.json(user)
+		const user = await getUser(correoUsuario);
+		res.json(user);
 	} catch ({ code, message }) {
 		res.status(code).send(message);
 	}
-})
+});
 
 app.get('/product/:id', verifyToken, async (req, res) => {
 	const { id } = req.params;
@@ -58,12 +59,22 @@ app.get('/product/:id', verifyToken, async (req, res) => {
 });
 
 app.get('/my-products', verifyToken, async (req, res) => {
-	const correoUsuario = req.correoUsuario;
+	const { usuario_id } = req.query;
 	try {
-		const myProducts = await getMyProducts(correoUsuario);
+		const myProducts = await getMyProducts(usuario_id);
 		res.json(myProducts);
 	} catch (error) {
-		res.status(500).send();
+		res.status(500).send(error);
+	}
+});
+
+app.get('/myFavorites', verifyToken, async (req, res) => {
+	const { usuario_id } = req.query;
+	try {
+		const data = await getMyFavorites(usuario_id);
+		res.json(data);
+	} catch (error) {
+		res.status(500).send(error);
 	}
 });
 
