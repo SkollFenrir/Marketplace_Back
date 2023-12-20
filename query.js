@@ -59,13 +59,12 @@ const getMyProducts = async (usuario_id) => {
 };
 
 const getMyFavorites = async (usuario) => {
-	
 	const formatQuery = format(
-		'SELECT * FROM mis_favoritos WHERE usuario_id = %s',
+		'SELECT p.id, p.titulo, p.descripcion, p.url_img, p.precio, p.estado FROM mis_favoritos AS mf JOIN productos AS p ON mf.producto_id = p.id WHERE mf.usuario_id = %s',
 		usuario
 	);
 	try {
-		console.log(usuario)
+		console.log(usuario);
 		const { rows: myFavorites } = await pool.query(formatQuery);
 		console.log(myFavorites);
 		return myFavorites;
@@ -74,9 +73,8 @@ const getMyFavorites = async (usuario) => {
 	}
 };
 
-const postVender = async (producto, correoUsuario) => {
-	let { titulo, descripcion, url_img, precio, estado } = producto;
-	const usuario_id = await getUsuarioId(correoUsuario);
+const postVender = async (producto) => {
+	let { usuario_id, titulo, descripcion, url_img, precio, estado } = producto;
 	const formatQuery = format(
 		'INSERT INTO productos (id, usuario_id, titulo, descripcion, url_img, precio, estado) VALUES (DEFAULT, %s, %L, %L, %L, %s, %L)',
 		usuario_id,
@@ -89,14 +87,17 @@ const postVender = async (producto, correoUsuario) => {
 	await pool.query(formatQuery);
 };
 
-const postMiFav = async (productoId, correoUsuario) => {
-	const usuarioId = await getUsuarioId(correoUsuario);
+const postMiFav = async (productoId, usuario_id) => {
 	const formatQuery = format(
 		'INSERT INTO mis_favoritos (id, usuario_id, producto_id) VALUES (DEFAULT, %s, %s)',
-		usuarioId,
+		usuario_id,
 		productoId
 	);
-	await pool.query(formatQuery);
+	try {
+		await pool.query(formatQuery);
+	} catch (error) {
+		console.log(error);
+	}
 };
 
 const postVerifyCrede = async (correo, contrasena) => {
@@ -159,12 +160,11 @@ const updateProducto = async (producto, id) => {
 	await pool.query(formatQuery);
 };
 
-const deleteMyFav = async (productId, correoUsuario) => {
-	const usuarioId = await getUsuarioId(correoUsuario);
+const deleteMyFav = async ( usuario_id,productoId) => {
 	const formatQuery = format(
 		'DELETE FROM mis_favoritos WHERE usuario_id = %s AND producto_id = %s',
-		usuarioId,
-		productId
+		usuario_id,
+		productoId
 	);
 	await pool.query(formatQuery);
 };
