@@ -25,14 +25,14 @@ const getProducts = async () => {
 };
 
 const getProduct = async (id) => {
-	const formatQuery = format('SELECT * FROM productos WHERE id = %s', id);
+	const formatQuery = format('SELECT * FROM productos WHERE id = %s AND estado = true', id);
 	const { rows: producto } = await pool.query(formatQuery);
 	return producto;
 };
 
 const getMyProducts = async (usuario_id) => {
 	const formatQuery = format(
-		'SELECT * FROM productos WHERE usuario_id = %s',
+		'SELECT * FROM productos WHERE usuario_id = %s AND estado = true',
 		usuario_id
 	);
 	const { rows: myProducts } = await pool.query(formatQuery);
@@ -41,7 +41,7 @@ const getMyProducts = async (usuario_id) => {
 
 const getMyFavorites = async (usuario) => {
 	const formatQuery = format(
-		'SELECT p.id, p.titulo, p.descripcion, p.url_img, p.precio, p.estado FROM mis_favoritos AS mf JOIN productos AS p ON mf.producto_id = p.id WHERE mf.usuario_id = %s',
+		'SELECT p.id, p.titulo, p.descripcion, p.url_img, p.precio, p.estado FROM mis_favoritos AS mf JOIN productos AS p ON mf.producto_id = p.id WHERE mf.usuario_id = %s AND p.estado = true',
 		usuario
 	);
 	try {
