@@ -68,7 +68,7 @@ app.get('/my-products', verifyToken, async (req, res) => {
 	}
 });
 
-app.get('/myFavorites', verifyToken, async (req, res) => {
+app.get('/my-favorites', verifyToken, async (req, res) => {
 	const { usuario_id } = req.query;
 	try {
 		const data = await getMyFavorites(usuario_id);
@@ -84,9 +84,9 @@ app.post('/login', checkCrede, async (req, res) => {
 		await postVerifyCrede(correo, contrasena);
 		const token = jwt.sign(
 			{ correo },
-			'key' /*  {
+			'key',  {
 			expiresIn: '1h',
-		} */
+		} 
 		);
 		res.send(token);
 	} catch (error) {
@@ -95,10 +95,10 @@ app.post('/login', checkCrede, async (req, res) => {
 });
 
 app.post('/product/:id', verifyToken, async (req, res) => {
-	const productoId = req.params.id;
-	const correoUsuario = req.correoUsuario;
+	const {usuario_id, producto_id} = req.body;
+	console.log(usuario_id, producto_id)
 	try {
-		await postMiFav(productoId, correoUsuario);
+		await postMiFav(producto_id, usuario_id);
 		res.send('Producto agregado a favoritos');
 	} catch (error) {
 		res.status(500).send(error);
@@ -117,9 +117,8 @@ app.post('/register', async (req, res) => {
 
 app.post('/sell', verifyToken, async (req, res) => {
 	const producto = req.body;
-	const correoUsuario = req.correoUsuario;
 	try {
-		await postVender(producto, correoUsuario);
+		await postVender(producto);
 		res.status(201).send('Producto ingresado exitosamente');
 	} catch (error) {
 		res.status(500).send(error);
@@ -138,11 +137,11 @@ app.put('/product/:id', verifyToken, async (req, res) => {
 });
 
 app.delete('/product/:id', verifyToken, async (req, res) => {
-	const productoId = req.params.id;
-	const correoUsuario = req.correoUsuario;
+	const {usuario_id, producto_id} = req.query;
+	console.log(usuario_id, producto_id)
 	try {
-		await deleteMyFav(productoId, correoUsuario);
-		res.send(`Producto con ID: ${productoId}, eliminado de favoritos`);
+		await deleteMyFav(usuario_id, producto_id);
+		res.send(`Producto con ID: ${producto_id}, eliminado de favoritos`);
 	} catch ({ code, message }) {
 		res.status(code).send(message);
 	}
