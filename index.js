@@ -39,7 +39,6 @@ app.get('/gallery', verifyToken, async (req, res) => {
 
 app.get('/profile', verifyToken, async (req, res) => {
 	const correoUsuario = req.correoUsuario;
-	console.log(correoUsuario);
 	try {
 		const user = await getUser(correoUsuario);
 		res.json(user);
@@ -82,12 +81,9 @@ app.post('/login', checkCrede, async (req, res) => {
 	const { correo, contrasena } = req.body;
 	try {
 		await postVerifyCrede(correo, contrasena);
-		const token = jwt.sign(
-			{ correo },
-			'key',  {
+		const token = jwt.sign({ correo }, 'key', {
 			expiresIn: '1h',
-		} 
-		);
+		});
 		res.send(token);
 	} catch (error) {
 		res.status(500).send(error);
@@ -95,8 +91,8 @@ app.post('/login', checkCrede, async (req, res) => {
 });
 
 app.post('/product/:id', verifyToken, async (req, res) => {
-	const {usuario_id, producto_id} = req.body;
-	console.log(usuario_id, producto_id)
+	const { usuario_id, producto_id } = req.body;
+	console.log(usuario_id, producto_id);
 	try {
 		await postMiFav(producto_id, usuario_id);
 		res.send('Producto agregado a favoritos');
@@ -126,19 +122,20 @@ app.post('/sell', verifyToken, async (req, res) => {
 });
 
 app.put('/product/:id', verifyToken, async (req, res) => {
-	const id = req.params.id;
-	const producto = req.body;
+	const  {producto_id}  = req.query;
+	let { estado } = req.body;
+	console.log(producto_id)
 	try {
-		await updateProducto(producto, id);
-		res.send(`El producto con ID: ${id}, fue modificado exitosamente.`);
+		await updateProducto(estado, producto_id);
+		res.send(`El producto con ID: ${producto_id}, fue modificado exitosamente.`);
 	} catch ({ code, message }) {
 		res.status(code).send(message);
 	}
 });
 
 app.delete('/product/:id', verifyToken, async (req, res) => {
-	const {usuario_id, producto_id} = req.query;
-	console.log(usuario_id, producto_id)
+	const { usuario_id, producto_id } = req.query;
+	console.log(usuario_id, producto_id);
 	try {
 		await deleteMyFav(usuario_id, producto_id);
 		res.send(`Producto con ID: ${producto_id}, eliminado de favoritos`);
