@@ -10,28 +10,9 @@ const pool = new Pool({
 	allowExitOnIdle: true,
 });
 
-const getUsuarioId = async (correoUsuario) => {
-	try {
-		const formatQuery = format(
-			'SELECT id FROM usuarios WHERE correo = %L',
-			correoUsuario
-		);
-		const {
-			rows: [{ id }],
-		} = await pool.query(formatQuery);
-		return id;
-	} catch (error) {
-		console.error('Error al verificar la existencia del producto:', error);
-		throw {
-			code: 404,
-			message: 'No se encontró ningún usuario con ese CORREO',
-		};
-	}
-};
-
 const getUser = async (correoUsuario) => {
 	const formatQuery = format(
-		'SELECT * FROM usuarios WHERE correo = %L',
+		'SELECT id, nombre, apellido, correo, genero FROM usuarios WHERE correo = %L',
 		correoUsuario
 	);
 	const { rows: user } = await pool.query(formatQuery);
@@ -39,7 +20,7 @@ const getUser = async (correoUsuario) => {
 };
 
 const getProducts = async () => {
-	const { rows: productos } = await pool.query('SELECT * FROM productos;');
+	const { rows: productos } = await pool.query('SELECT * FROM productos WHERE estado = true;');
 	return productos;
 };
 
@@ -64,9 +45,7 @@ const getMyFavorites = async (usuario) => {
 		usuario
 	);
 	try {
-		console.log(usuario);
 		const { rows: myFavorites } = await pool.query(formatQuery);
-		console.log(myFavorites);
 		return myFavorites;
 	} catch (error) {
 		console.log(error);
@@ -145,15 +124,13 @@ const checkProductExists = async (productId) => {
 	}
 };
 
-const updateProducto = async (producto, id) => {
-	let { precio, estado } = producto;
+const updateProducto = async (estado , productoId) => {
 	const formatQuery = format(
-		'UPDATE productos SET precio = %L, estado = %L WHERE id = %s RETURNING *',
-		precio,
+		'UPDATE productos SET estado = %L WHERE id = %s RETURNING *',
 		estado,
-		id
+		productoId
 	);
-	const productExists = await checkProductExists(id);
+	const productExists = await checkProductExists(productoId);
 	if (!productExists) {
 		throw { code: 404, message: 'No se encontró ningún producto con ese ID' };
 	}
