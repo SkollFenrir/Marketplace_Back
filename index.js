@@ -49,7 +49,7 @@ app.get('/profile', verifyToken, async (req, res) => {
 });
 
 app.get('/product/:id', verifyToken, async (req, res) => {
-	const { id } = req.params;
+	const { id } = req.query;
 	try {
 		const producto = await getProduct(id);
 		res.json(producto);
@@ -59,9 +59,9 @@ app.get('/product/:id', verifyToken, async (req, res) => {
 });
 
 app.get('/my-products', verifyToken, async (req, res) => {
-	const { usuario_id } = req.query;
+	const correoUsuario = req.correoUsuario;
 	try {
-		const myProducts = await getMyProducts(usuario_id);
+		const myProducts = await getMyProducts(correoUsuario);
 		res.json(myProducts);
 	} catch (error) {
 		res.status(500).send(error);
@@ -69,24 +69,26 @@ app.get('/my-products', verifyToken, async (req, res) => {
 });
 
 app.get('/my-favorites', verifyToken, async (req, res) => {
-	const { usuario_id } = req.query;
+	const correoUsuario = req.correoUsuario;
 	try {
-		const data = await getMyFavorites(usuario_id);
+		const data = await getMyFavorites(correoUsuario);
 		res.json(data);
 	} catch (error) {
 		res.status(500).send(error);
 	}
 });
 
-app.get('/isFavorite', verifyToken, async (req, res)=>{
-	const {usuario_id, producto_id} = req.query;
+app.get('/isFavorite', verifyToken, async (req, res) => {
+	const { producto_id } = req.query;
+	const correoUsuario = req.correoUsuario;
+
 	try {
-		const data = await isFavorite(usuario_id, producto_id)
-		res.json(data)
+		const data = await isFavorite(correoUsuario, producto_id);
+		res.json(data);
 	} catch (error) {
-		res.status(500).send(error)
+		res.status(500).send(error);
 	}
-})
+});
 
 app.post('/login', checkCrede, async (req, res) => {
 	const { correo, contrasena } = req.body;
@@ -102,10 +104,11 @@ app.post('/login', checkCrede, async (req, res) => {
 });
 
 app.post('/product/:id', verifyToken, async (req, res) => {
-	const { usuario_id, producto_id } = req.body;
-	console.log(usuario_id, producto_id);
+	const { producto_id } = req.body;
+	const correoUsuario = req.correoUsuario;
+
 	try {
-		await postMiFav(producto_id, usuario_id);
+		await postMiFav(producto_id, correoUsuario);
 		res.send('Producto agregado a favoritos');
 	} catch (error) {
 		res.status(500).send(error);
@@ -123,9 +126,10 @@ app.post('/register', async (req, res) => {
 });
 
 app.post('/sell', verifyToken, async (req, res) => {
+	const correoUsuario = req.correoUsuario;
 	const producto = req.body;
 	try {
-		await postVender(producto);
+		await postVender(producto, correoUsuario);
 		res.status(201).send('Producto ingresado exitosamente');
 	} catch (error) {
 		res.status(500).send(error);
@@ -133,22 +137,23 @@ app.post('/sell', verifyToken, async (req, res) => {
 });
 
 app.put('/product/:id', verifyToken, async (req, res) => {
-	const  {producto_id}  = req.query;
+	const { producto_id } = req.query;
 	let { estado } = req.body;
-	console.log(producto_id)
 	try {
 		await updateProducto(estado, producto_id);
-		res.send(`El producto con ID: ${producto_id}, fue modificado exitosamente.`);
+		res.send(
+			`El producto con ID: ${producto_id}, fue modificado exitosamente.`
+		);
 	} catch ({ code, message }) {
 		res.status(code).send(message);
 	}
 });
 
 app.delete('/product/:id', verifyToken, async (req, res) => {
-	const { usuario_id, producto_id } = req.query;
-	console.log(usuario_id, producto_id);
+	const {  producto_id } = req.query;
+	const correoUsuario = req.correoUsuario;
 	try {
-		await deleteMyFav(usuario_id, producto_id);
+		await deleteMyFav(correoUsuario, producto_id);
 		res.send(`Producto con ID: ${producto_id}, eliminado de favoritos`);
 	} catch ({ code, message }) {
 		res.status(code).send(message);

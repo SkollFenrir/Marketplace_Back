@@ -10,6 +10,25 @@ const pool = new Pool({
 	allowExitOnIdle: true,
 });
 
+const getUsuarioId = async (correoUsuario) => {
+	try {
+		const formatQuery = format(
+			'SELECT id FROM usuarios WHERE correo = %L',
+			correoUsuario
+		);
+		const {
+			rows: [{ id }],
+		} = await pool.query(formatQuery);
+		return id;
+	} catch (error) {
+		console.error('Error al verificar la existencia del producto:', error);
+		throw {
+			code: 404,
+			message: 'No se encontró ningún usuario con ese CORREO',
+		};
+	}
+};
+
 const getUser = async (correoUsuario) => {
 	const formatQuery = format(
 		'SELECT id, nombre, apellido, correo, genero FROM usuarios WHERE correo = %L',
@@ -35,7 +54,8 @@ const getProduct = async (id) => {
 	return producto;
 };
 
-const getMyProducts = async (usuario_id) => {
+const getMyProducts = async (correoUsuario) => {
+	const usuario_id = await getUsuarioId(correoUsuario);
 	const formatQuery = format(
 		'SELECT * FROM productos WHERE usuario_id = %s AND estado = true',
 		usuario_id
@@ -44,10 +64,11 @@ const getMyProducts = async (usuario_id) => {
 	return myProducts;
 };
 
-const getMyFavorites = async (usuario) => {
+const getMyFavorites = async (correoUsuario) => {
+	const usuario_id = await getUsuarioId(correoUsuario);
 	const formatQuery = format(
 		'SELECT p.id, p.titulo, p.descripcion, p.url_img, p.precio, p.estado FROM mis_favoritos AS mf JOIN productos AS p ON mf.producto_id = p.id WHERE mf.usuario_id = %s AND p.estado = true',
-		usuario
+		usuario_id
 	);
 	try {
 		const { rows: myFavorites } = await pool.query(formatQuery);
@@ -57,8 +78,9 @@ const getMyFavorites = async (usuario) => {
 	}
 };
 
-const postVender = async (producto) => {
-	let { usuario_id, titulo, descripcion, url_img, precio, estado } = producto;
+const postVender = async (producto, correoUsuario) => {
+	let { titulo, descripcion, url_img, precio, estado } = producto;
+	const usuario_id = await getUsuarioId(correoUsuario);
 	const formatQuery = format(
 		'INSERT INTO productos (id, usuario_id, titulo, descripcion, url_img, precio, estado) VALUES (DEFAULT, %s, %L, %L, %L, %s, %L)',
 		usuario_id,
@@ -71,17 +93,14 @@ const postVender = async (producto) => {
 	await pool.query(formatQuery);
 };
 
-const postMiFav = async (productoId, usuario_id) => {
+const postMiFav = async (productoId, correoUsuario) => {
+	const usuario_id = await getUsuarioId(correoUsuario);
 	const formatQuery = format(
 		'INSERT INTO mis_favoritos (id, usuario_id, producto_id) VALUES (DEFAULT, %s, %s)',
 		usuario_id,
 		productoId
 	);
-	try {
-		await pool.query(formatQuery);
-	} catch (error) {
-		console.log(error);
-	}
+	await pool.query(formatQuery);
 };
 
 const postVerifyCrede = async (correo, contrasena) => {
@@ -129,8 +148,9 @@ const checkProductExists = async (productId) => {
 	}
 };
 
-const isFavorite = async (usuario_id, producto_id) => {
+const isFavorite = async (correoUsuario, producto_id) => {
 	try {
+		const usuario_id = await getUsuarioId(correoUsuario);
 		const formatQuery = format(
 			'SELECT 1 FROM mis_favoritos WHERE usuario_id = %s AND producto_id = %s',
 			usuario_id,
@@ -157,7 +177,9 @@ const updateProducto = async (estado, productoId) => {
 	await pool.query(formatQuery);
 };
 
-const deleteMyFav = async (usuario_id, productoId) => {
+const deleteMyFav = async (correoUsuario, productoId) => {
+	const usuario_id = await getUsuarioId(correoUsuario);
+
 	const formatQuery = format(
 		'DELETE FROM mis_favoritos WHERE usuario_id = %s AND producto_id = %s',
 		usuario_id,
