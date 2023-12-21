@@ -12,6 +12,7 @@ const {
 	deleteMyFav,
 	getUser,
 	getMyFavorites,
+	isFavorite,
 } = require('./query');
 const { checkCrede, verifyToken } = require('./middlewares.js');
 const cors = require('cors');
@@ -76,6 +77,16 @@ app.get('/my-favorites', verifyToken, async (req, res) => {
 		res.status(500).send(error);
 	}
 });
+
+app.get('/isFavorite', verifyToken, async (req, res)=>{
+	const {usuario_id, producto_id} = req.query;
+	try {
+		const data = await isFavorite(usuario_id, producto_id)
+		res.json(data)
+	} catch (error) {
+		res.status(500).send(error)
+	}
+})
 
 app.post('/login', checkCrede, async (req, res) => {
 	const { correo, contrasena } = req.body;

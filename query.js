@@ -20,12 +20,17 @@ const getUser = async (correoUsuario) => {
 };
 
 const getProducts = async () => {
-	const { rows: productos } = await pool.query('SELECT * FROM productos WHERE estado = true;');
+	const { rows: productos } = await pool.query(
+		'SELECT * FROM productos WHERE estado = true;'
+	);
 	return productos;
 };
 
 const getProduct = async (id) => {
-	const formatQuery = format('SELECT * FROM productos WHERE id = %s AND estado = true', id);
+	const formatQuery = format(
+		'SELECT * FROM productos WHERE id = %s AND estado = true',
+		id
+	);
 	const { rows: producto } = await pool.query(formatQuery);
 	return producto;
 };
@@ -124,7 +129,22 @@ const checkProductExists = async (productId) => {
 	}
 };
 
-const updateProducto = async (estado , productoId) => {
+const isFavorite = async (usuario_id, producto_id) => {
+	try {
+		const formatQuery = format(
+			'SELECT 1 FROM mis_favoritos WHERE usuario_id = %s AND producto_id = %s',
+			usuario_id,
+			producto_id
+		);
+		const result = await pool.query(formatQuery);
+		return result.rows.length > 0;
+	} catch (error) {
+		console.error('Error al verificar la existencia del producto:', error);
+		throw { code: 500, message: 'Error interno del servidor' };
+	}
+};
+
+const updateProducto = async (estado, productoId) => {
 	const formatQuery = format(
 		'UPDATE productos SET estado = %L WHERE id = %s RETURNING *',
 		estado,
@@ -137,7 +157,7 @@ const updateProducto = async (estado , productoId) => {
 	await pool.query(formatQuery);
 };
 
-const deleteMyFav = async ( usuario_id,productoId) => {
+const deleteMyFav = async (usuario_id, productoId) => {
 	const formatQuery = format(
 		'DELETE FROM mis_favoritos WHERE usuario_id = %s AND producto_id = %s',
 		usuario_id,
@@ -168,4 +188,5 @@ module.exports = {
 	updateProducto,
 	deleteProduct,
 	deleteMyFav,
+	isFavorite,
 };
