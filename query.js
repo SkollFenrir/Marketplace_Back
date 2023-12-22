@@ -2,14 +2,14 @@ const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const format = require('pg-format');
 
-const DBConnLink =
-	'postgres://avdg:4n2f9AjgObRXrb5DZbKKjIpxErOibP6K@dpg-cm2r9ita73kc73elv46g-a.oregon-postgres.render.com/avdgplacedb';
+
 const pool = new Pool({
-	connectionString:DBConnLink,
+	connectionString:'postgres://avdg:4n2f9AjgObRXrb5DZbKKjIpxErOibP6K@dpg-cm2r9ita73kc73elv46g-a.oregon-postgres.render.com/avdgplacedb',
 	ssl: {
-		rejecUnauthorized: false,
+		rejectUnauthorized: false,
 	},
 });
+
 
 /* const pool = new Pool({
 	host: 'dpg-clvhtrla73kc73bq03j0-a.oregon-postgres.render.com',
