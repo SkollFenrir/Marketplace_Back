@@ -5,7 +5,7 @@ const format = require('pg-format');
 const DBConnLink =
 	'postgres://avdg:4n2f9AjgObRXrb5DZbKKjIpxErOibP6K@dpg-cm2r9ita73kc73elv46g-a/avdgplacedb';
 const pool = new Pool({
-	connectionString: process.env.DBConnLink,
+	connectionString:DBConnLink,
 	ssl: {
 		rejecUnauthorized: false,
 	},
