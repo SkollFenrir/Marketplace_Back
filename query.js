@@ -2,13 +2,21 @@ const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const format = require('pg-format');
 
+const DBConnLink =
+	'postgres://avdg:4n2f9AjgObRXrb5DZbKKjIpxErOibP6K@dpg-cm2r9ita73kc73elv46g-a/avdgplacedb';
 const pool = new Pool({
+	connectionString: process.env.DBConnLink,
+	ssl: {
+		rejecUnauthorized: false,
+	},
+});
+/* const pool = new Pool({
 	host: 'dpg-cm2r9ita73kc73elv46g-a',
 	user: 'avdg',
 	password: '4n2f9AjgObRXrb5DZbKKjIpxErOibP6K',
 	database: 'avdgplacedb',
 	allowExitOnIdle: true,
-});
+}); */
 
 const getUsuarioId = async (correoUsuario) => {
 	try {
