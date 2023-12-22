@@ -19,7 +19,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const morganBody = require('morgan-body');
 const app = express();
-const PORT = 3000;
+const PORT = 5432;
 
 morganBody(app);
 

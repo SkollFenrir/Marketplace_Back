@@ -3,10 +3,10 @@ const bcrypt = require('bcryptjs');
 const format = require('pg-format');
 
 const pool = new Pool({
-	host: 'localhost',
-	user: 'postgres',
-	password: 'postgres',
-	database: 'marketplace',
+	host: 'dpg-cm2r9ita73kc73elv46g-a',
+	user: 'avdg',
+	password: '4n2f9AjgObRXrb5DZbKKjIpxErOibP6K',
+	database: 'avdgplacedb',
 	allowExitOnIdle: true,
 });
 
